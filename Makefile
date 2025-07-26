@@ -539,7 +539,7 @@ setup-db: ## [utilities] Initialize DynamoDB tables for the application
 		exit 1; \
 	fi
 	@printf "$(INFO)[INFO]$(RESET)     Creating DynamoDB tables...\n"
-	@docker compose exec backend python scripts/setup_db.py
+	@docker compose exec backend pipenv run python scripts/setup_db.py
 	@printf "$(SUCCESS)[SUCCESS]$(RESET)  Database tables created successfully\n"
 	@echo ""
 
@@ -578,7 +578,7 @@ check-db: ## [utilities] Check database connection and table status
 		exit 1; \
 	fi
 	@printf "$(INFO)[INFO]$(RESET)     Checking DynamoDB connection...\n"
-	@docker compose exec backend python -c "import boto3; import os; client = boto3.client('dynamodb', endpoint_url=os.getenv('DYNAMODB_ENDPOINT', 'http://dynamodb-local:8000'), region_name='us-east-1', aws_access_key_id='dummy', aws_secret_access_key='dummy'); print('Tables:', client.list_tables()['TableNames'])"
+	@docker compose exec backend pipenv run python -c "import boto3; import os; client = boto3.client('dynamodb', endpoint_url=os.getenv('DYNAMODB_ENDPOINT', 'http://dynamodb-local:8000'), region_name='us-east-1', aws_access_key_id='dummy', aws_secret_access_key='dummy'); print('Tables:', client.list_tables()['TableNames'])"
 	@printf "$(SUCCESS)[SUCCESS]$(RESET)  Database connection verified\n"
 	@echo ""
 

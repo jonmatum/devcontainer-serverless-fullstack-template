@@ -18,6 +18,11 @@ services:
     environment:
       MODULE_NAME: app.main
       VARIABLE_NAME: app
+      DYNAMODB_ENDPOINT: http://dynamodb-local:${DYNAMODB_PORT}
+      AWS_REGION: us-east-1
+      TABLE_NAME: counter_table
+      AWS_ACCESS_KEY_ID: dummy
+      AWS_SECRET_ACCESS_KEY: dummy
     ports:
       - "${BACKEND_PORT}:8000"
     volumes:
@@ -27,6 +32,8 @@ services:
     healthcheck:
       disable: true
     restart: unless-stopped
+    depends_on:
+      - dynamodb-local
 
   frontend:
     build:
