@@ -413,61 +413,61 @@ logs: ## [docker] Follow logs from all containers
 # ==============================================================================
 
 dc-build: ## [devcontainer] Build using DevContainer CLI
-	$(call log_step, "Building with DevContainer CLI")
+	@printf "$(HEADER)>> Building with DevContainer CLI$(RESET)\n"
 	$(DC_CLI) build
-	$(call log_success, "DevContainer build completed")
+	@printf "$(SUCCESS)[SUCCESS]$(RESET)  DevContainer build completed\n"
 
 dc-up: ## [devcontainer] Start using DevContainer CLI
-	$(call log_step, "Starting with DevContainer CLI")
+	@printf "$(HEADER)>> Starting with DevContainer CLI$(RESET)\n"
 	$(DC_CLI) up
-	$(call log_success, "DevContainer started")
+	@printf "$(SUCCESS)[SUCCESS]$(RESET)  DevContainer started\n"
 
 dc-down: ## [devcontainer] Stop using DevContainer CLI
-	$(call log_step, "Stopping DevContainer")
+	@printf "$(HEADER)>> Stopping DevContainer$(RESET)\n"
 	$(DC_CLI) down
-	$(call log_success, "DevContainer stopped")
+	@printf "$(SUCCESS)[SUCCESS]$(RESET)  DevContainer stopped\n"
 
 # ==============================================================================
 # MAINTENANCE COMMANDS
 # ==============================================================================
 
 clean: ## [maintenance] Remove stopped containers and dangling images
-	$(call log_step, "Cleaning Docker Resources")
+	@printf "$(HEADER)>> Cleaning Docker Resources$(RESET)\n"
 	docker system prune -f
-	$(call log_success, "Docker cleanup completed")
+	@printf "$(SUCCESS)[SUCCESS]$(RESET)  Docker cleanup completed\n"
 
 clean-volumes: ## [maintenance] Remove unused volumes (WARNING: deletes data)
-	$(call log_step, "Cleaning Docker Volumes")
+	@printf "$(HEADER)>> Cleaning Docker Volumes$(RESET)\n"
 	@printf "$(WARN)[WARNING]$(RESET) This will delete all unused Docker volumes including databases\n"
 	@printf "Are you sure you want to continue? [y/N]: "; \
 	read -r confirm; \
 	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
 		docker volume prune -f; \
-		$(call log_success, "Volume cleanup completed"); \
+		printf "$(SUCCESS)[SUCCESS]$(RESET)  Volume cleanup completed\n"; \
 	else \
-		$(call log_info, "Volume cleanup cancelled"); \
+		printf "$(INFO)[INFO]$(RESET)     Volume cleanup cancelled\n"; \
 	fi
 
 nuke: ## [maintenance] Nuclear option - remove everything (containers, images, volumes)
-	$(call log_step, "Nuclear Cleanup - Removing Everything")
+	@printf "$(HEADER)>> Nuclear Cleanup - Removing Everything$(RESET)\n"
 	@printf "$(ERROR)[DANGER]$(RESET) This will remove ALL containers, images, and volumes\n"
 	@printf "Are you sure you want to continue? [y/N]: "; \
 	read -r confirm; \
 	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
 		docker compose $(COMPOSE_FILES) down -v --remove-orphans; \
 		docker system prune -a --volumes -f; \
-		$(call log_success, "Nuclear cleanup completed"); \
+		printf "$(SUCCESS)[SUCCESS]$(RESET)  Nuclear cleanup completed\n"; \
 	else \
-		$(call log_info, "Nuclear cleanup cancelled"); \
+		printf "$(INFO)[INFO]$(RESET)     Nuclear cleanup cancelled\n"; \
 	fi
 
 rebuild: ## [maintenance] Rebuild all containers without cache
-	$(call log_step, "Rebuilding All Containers")
+	@printf "$(HEADER)>> Rebuilding All Containers$(RESET)\n"
 	docker compose $(COMPOSE_FILES) build --no-cache
-	$(call log_success, "All containers rebuilt")
+	@printf "$(SUCCESS)[SUCCESS]$(RESET)  All containers rebuilt\n"
 
 reset-all: ## [maintenance] Complete reset (clean volumes, rebuild, start)
-	$(call log_step, "Complete Environment Reset")
+	@printf "$(HEADER)>> Complete Environment Reset$(RESET)\n"
 	@$(MAKE) down
 	@$(MAKE) clean-volumes
 	@$(MAKE) rebuild
@@ -546,7 +546,7 @@ setup-db: ## [utilities] Initialize DynamoDB tables for the application
 reset-db: ## [utilities] Reset all database tables (WARNING: This will delete all data)
 	@printf "$(HEADER)>> Resetting Database Tables$(RESET)\n"
 	@echo ""
-	@printf "$(WARNING)[WARNING]$(RESET)  This will delete all data in the database!\n"
+	@printf "$(WARN)[WARNING]$(RESET)  This will delete all data in the database!\n"
 	@read -p "Are you sure? (y/N): " confirm; \
 	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
 		if docker compose ps dynamodb-local | grep -q "Up"; then \
