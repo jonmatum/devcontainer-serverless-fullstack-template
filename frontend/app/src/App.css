@@ -40,3 +40,31 @@
 .read-the-docs {
   color: #888;
 }
+
+/* DevContainer Template Enhancements */
+h1 {
+  background: linear-gradient(135deg, #646cff 0%, #61dafb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+}
+
+.card p {
+  margin-top: 1rem;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.card code {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  .card code {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
