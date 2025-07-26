@@ -1,6 +1,6 @@
-# DevContainer Developer Workspace Template
+# DevContainer Serverless Fullstack Template
 
-A modern, opinionated, and extensible Dev Container template built for cloud, full-stack, DevOps, and infrastructure developers. Easily reproducible, portable, and ready for work in seconds.
+A modern, opinionated, and extensible DevContainer template built for cloud, full-stack, DevOps, and infrastructure developers. Easily reproducible, portable, and ready for work in seconds.
 
 ## Key Features
 
@@ -11,27 +11,40 @@ A modern, opinionated, and extensible Dev Container template built for cloud, fu
 - **Cross-platform compatibility** - works seamlessly on macOS, Linux, and Windows
 
 ### Development Stack
-- **Shell Environment**: Zsh, Oh My Zsh, Powerlevel10k with syntax highlighting and autosuggestions
-- **Cloud Tools**: AWS CLI v2, Terraform + tfswitch, OpenTofu
-- **Languages**: Node.js 20.11.1, Python 3.11.9 with pipenv support
-- **Quality Tools**: Pre-commit hooks with optional global configuration
+- **Shell Environment**: Zsh, Oh My Zsh, Powerlevel10k with syntax highlighting, autosuggestions, and opinionated configuration
+- **Cloud Tools**: AWS CLI v2, Terraform + tfswitch, OpenTofu v1.6.2
+- **Languages**: Node.js 20.11.1 (via nvm), Python 3.11.9 (via pyenv) with pipenv support
+- **Frontend**: React 19.0.0, Vite 6.3.4, TypeScript 5.7.2, ESLint 9.22.0
+- **Backend**: FastAPI with Python 3.11, Uvicorn server
+- **Quality Tools**: Pre-commit hooks with global configuration option
 - **Customizable Features**: Toggle each feature as needed with flags
 
 ### Installed Tools
 `terraform`, `aws`, `node`, `npm`, `python`, `pip`, `pipenv`, `tofu`, `pre-commit`, `zsh`
 
-### VS Code Extensions
-Curated, enterprise-grade extensions included:
+### DevContainer Features
+Custom features with configurable options:
 
-- **Cloud & Infrastructure**: `hashicorp.terraform`, `amazonwebservices.aws-toolkit-vscode`, `redhat.vscode-yaml`
-- **Python Development**: `ms-python.*`, `ms-toolsai.jupyter`
+- **Shell Environment**: Zsh with Oh My Zsh, Powerlevel10k theme, autosuggestions with yellow highlighting, syntax highlighting, and opinionated configuration
+- **AWS CLI**: Version 2 with full AWS toolkit integration
+- **Terraform**: Latest version with tfswitch support
+- **Node.js**: Version 20.11.1 via nvm with npm package management
+- **Python**: Version 3.11.9 via pyenv with pipenv support enabled
+- **OpenTofu**: Version 1.6.2 for Terraform-compatible infrastructure management
+- **Pre-commit**: Global configuration enabled for consistent code quality
+
+### VS Code Extensions
+Curated, enterprise-grade extensions included (30 total):
+
+- **Cloud & Infrastructure**: `hashicorp.terraform`, `amazonwebservices.aws-toolkit-vscode`, `amazonwebservices.amazon-q-vscode`, `redhat.vscode-yaml`
+- **Python Development**: `ms-python.python`, `ms-python.vscode-pylance`, `ms-python.black-formatter`, `ms-python.isort`, `ms-toolsai.jupyter`, `ms-python.debugpy`
 - **Web Development**: `dbaeumer.vscode-eslint`, `esbenp.prettier-vscode`, `bradlc.vscode-tailwindcss`
 - **Shell & DevOps**: `timonwong.shellcheck`, `foxundermoon.shell-format`
 - **Containers**: `ms-azuretools.vscode-docker`
-- **Collaboration**: `eamodio.gitlens`, `ms-vsliveshare.vsliveshare`, `github.vscode-github-actions`
+- **Collaboration**: `eamodio.gitlens`, `donjayamanne.githistory`, `ms-vsliveshare.vsliveshare`, `github.vscode-github-actions`
 - **Documentation**: `bierner.markdown-mermaid`, `streetsidesoftware.code-spell-checker`
-- **Remote Development**: `ms-vscode-remote.*`
-- **Productivity**: `visualstudioexptteam.vscodeintellicode`, `naumovs.color-highlight`
+- **Remote Development**: `ms-vscode-remote.remote-containers`, `ms-vscode-remote.remote-ssh`, `ms-vscode-remote.remote-ssh-edit`, `ms-vscode-remote.remote-wsl`, `ms-vscode-remote.vscode-remote-extensionpack`
+- **Productivity**: `visualstudioexptteam.vscodeintellicode`, `naumovs.color-highlight`, `ms-vscode.makefile-tools`
 
 ## Quick Start
 
@@ -39,7 +52,7 @@ Curated, enterprise-grade extensions included:
 
 1. **Clone this template:**
    ```bash
-   gh repo create my-devcontainer --template jonmatum/devcontainer-developer-workspace-fullstack-poc
+   gh repo create my-devcontainer --template jonmatum/devcontainer-serverless-fullstack-template
    cd my-devcontainer
    ```
 
@@ -67,9 +80,9 @@ Curated, enterprise-grade extensions included:
 ### Method 2: Manual DevContainer Setup
 
 1. Clone the template
-2. Open in Visual Studio Code
-3. Use `Dev Containers: Reopen in Container` from the Command Palette
-4. Run `make init` inside the container to complete setup
+2. Run `make init` to initialize the project configuration
+3. Open in Visual Studio Code
+4. Use `Dev Containers: Reopen in Container` from the Command Palette
 
 ## Why `make init` is Essential
 
@@ -108,15 +121,16 @@ Without proper initialization, you might encounter:
 
 The system intelligently manages ports to prevent conflicts:
 
-- **Automatic Detection**: Scans your system for available ports starting from 3000
-- **Conflict Resolution**: If port 3000 is busy, automatically assigns 3001, 3002, etc.
+- **Automatic Detection**: Scans your system for available ports starting from 3000 (configurable via `PORT_START`)
+- **Conflict Resolution**: Uses `lsof` to detect port usage and automatically assigns next available port
 - **Service Mapping**: 
-  - Frontend (React/Vite): First available port
-  - Backend (FastAPI): Second available port  
-  - DynamoDB Admin: Third available port
-  - DynamoDB Local: Fourth available port
+  - Frontend (React/Vite): First available port (FPORT)
+  - Backend (FastAPI): Second available port (BPORT = FPORT+1)  
+  - DynamoDB Admin: Third available port (APORT = BPORT+1)
+  - DynamoDB Local: Fourth available port (DPORT = APORT+1)
 - **DevContainer Sync**: Automatically updates `.devcontainer/devcontainer.json` with assigned ports
 - **Environment Variables**: Creates `.env` file with port assignments for consistent usage
+- **Hardcoded Forward Ports**: DevContainer forwards ports 3005-3008 by default
 
 ### Port Assignment Example
 
@@ -150,7 +164,7 @@ make logs      # Follow container logs
 make clean     # Clean up Docker resources
 ```
 
-### Command Categories
+### Command Categories (24 total commands)
 
 - **Initialization & Setup**: Project initialization and configuration
 - **Component Setup**: Individual component management  
@@ -186,10 +200,12 @@ Component Status
 This template includes the following services:
 
 - **DevContainer**: Main development environment with all tools
-- **Frontend**: React application with Vite (port 3000 by default)
-- **Backend**: FastAPI Python application (port 3001 by default)
-- **DynamoDB Local**: Local DynamoDB instance for development (port 3003 by default)
-- **DynamoDB Admin**: Web interface for DynamoDB management (port 3002 by default)
+- **Frontend**: React 19.0.0 application with Vite 6.3.4 and TypeScript 5.7.2 (dynamically assigned port, starts from 3000)
+- **Backend**: FastAPI Python 3.11 application with Uvicorn server (dynamically assigned port, typically 3001)
+- **DynamoDB Local**: Local DynamoDB instance for development (dynamically assigned port, typically 3003)
+- **DynamoDB Admin**: Web interface for DynamoDB management (dynamically assigned port, typically 3002)
+
+**Note**: All service ports are dynamically assigned to prevent conflicts. The DevContainer also forwards ports 3005-3008 by default.
 
 ## Advanced Usage
 
