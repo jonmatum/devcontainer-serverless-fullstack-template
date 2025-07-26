@@ -52,7 +52,7 @@ Curated, enterprise-grade extensions included (30 total):
 
 1. **Clone this template:**
    ```bash
-   gh repo create my-devcontainer --template jonmatum/devcontainer-serverless-fullstack-template
+   gh repo create my-devcontainer --template jonmatum/devcontainer-serverless-fullstack-template --public --clone
    cd my-devcontainer
    ```
 
