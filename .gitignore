@@ -1,37 +1,84 @@
-# Local .terraform directories
-.terraform/
+# ------------------------------------------------------------------------------
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
 
-# .tfstate files
+# Virtual environments
+backend/.venv/
+backend/.mypy_cache/
+backend/.pytest_cache/
+backend/Pipfile.lock
+
+# ------------------------------------------------------------------------------
+# Node.js artifacts
+frontend/app/node_modules/
+frontend/app/dist/
+frontend/app/.vite/
+
+# ------------------------------------------------------------------------------
+# Docker / Container data
+*.pid
+*.log
+data/
+**/data/
+.vscode/
+.vscode-server/
+.vscode-remote.json
+.devcontainer/scripts/__pycache__/
+
+# ------------------------------------------------------------------------------
+# Secrets and Credentials (IMPORTANT)
+**/.env
+**/.env.*
+.env
+.env.*
+.aws/
+.aws/credentials
+.aws/config
+.ssh/
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+
+# ------------------------------------------------------------------------------
+# Terraform state
 *.tfstate
-*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
 
-# Crash log files
-crash.log
-crash.*.log
+# ------------------------------------------------------------------------------
+# Visual Studio Code settings
+.vscode/
+*.code-workspace
 
-# Exclude all .tfvars files, which are likely to contain sensitive data, such as
-# password, private keys, and other secrets. These should not be part of version 
-# control as they are data points which are potentially sensitive and subject 
-# to change depending on the environment.
-*.tfvars
-*.tfvars.json
+# ------------------------------------------------------------------------------
+# Operating System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
 
-# Ignore override files as they are usually used to override resources locally and so
-# are not checked in
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
+# ------------------------------------------------------------------------------
+# Editor / Tooling temp files
+*.bak
+*.swp
+*.swo
+*.tmp
+*.orig
+*~
+.idea/
+*.iml
 
-# Ignore transient lock info files created by terraform apply
-.terraform.tfstate.lock.info
-
-# Include override files you do wish to add to version control using negated pattern
-# !example_override.tf
-
-# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
-# example: *tfplan*
-
-# Ignore CLI configuration files
-.terraformrc
-terraform.rc
+# ------------------------------------------------------------------------------
+# Backup or auto-save files
+*.autosave
+*.save
+*.backup
