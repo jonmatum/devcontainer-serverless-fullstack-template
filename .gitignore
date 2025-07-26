@@ -17,6 +17,7 @@ backend/Pipfile.lock
 frontend/app/node_modules/
 frontend/app/dist/
 frontend/app/.vite/
+frontend/.pnpm-store/
 
 # ------------------------------------------------------------------------------
 # Docker / Container data
