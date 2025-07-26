@@ -195,17 +195,83 @@ Component Status
   Backend:     Available
 ```
 
-## Services Overview
+## Full-Stack Integration Example
 
-This template includes the following services:
+This template includes a complete full-stack integration example that demonstrates:
 
-- **DevContainer**: Main development environment with all tools
-- **Frontend**: React 19.0.0 application with Vite 6.3.4 and TypeScript 5.7.2 (dynamically assigned port, starts from 3000)
-- **Backend**: FastAPI Python 3.11 application with Uvicorn server (dynamically assigned port, typically 3001)
-- **DynamoDB Local**: Local DynamoDB instance for development (dynamically assigned port, typically 3003)
-- **DynamoDB Admin**: Web interface for DynamoDB management (dynamically assigned port, typically 3002)
+### Counter Application Features
+- **Frontend**: React component with TypeScript that displays and manages a counter
+- **Backend**: FastAPI endpoints for counter operations with proper error handling
+- **Database**: DynamoDB Local for persistent storage
+- **Dynamic Port Discovery**: Frontend automatically discovers backend API endpoint
+- **Graceful Degradation**: Falls back to local state if backend is unavailable
 
-**Note**: All service ports are dynamically assigned to prevent conflicts. The DevContainer also forwards ports 3005-3008 by default.
+### API Endpoints
+
+The backend provides RESTful endpoints for counter management:
+
+```bash
+GET    /api/counter     # Get current counter value
+POST   /api/counter     # Increment counter (body: {"increment": 1})
+DELETE /api/counter     # Reset counter to zero
+GET    /              # Health check and API information
+```
+
+### Database Setup
+
+Initialize the database tables after starting the containers:
+
+```bash
+make setup-db          # Create required DynamoDB tables
+make check-db          # Verify database connection and tables
+make reset-db          # Reset database (WARNING: deletes all data)
+```
+
+### Integration Architecture
+
+```
+┌─────────────────┐    HTTP/REST    ┌─────────────────┐    AWS SDK    ┌─────────────────┐
+│   React App     │ ──────────────> │   FastAPI       │ ────────────> │   DynamoDB      │
+│   (Frontend)    │                 │   (Backend)     │               │   Local         │
+│   Port: 3000    │ <────────────── │   Port: 3001    │ <──────────── │   Port: 8000    │
+└─────────────────┘    JSON         └─────────────────┘    boto3      └─────────────────┘
+```
+
+### Template Reusability Features
+
+**Dynamic Port Management**: The frontend automatically discovers the backend port using the template's port assignment pattern (frontend port + 1).
+
+**Environment Configuration**: All services use environment variables for configuration, making it easy to adapt for different environments.
+
+**Graceful Fallback**: The application works even if the backend is unavailable, demonstrating resilient design patterns.
+
+**AWS Best Practices**: The code structure follows AWS Lambda and API Gateway patterns, making it easy to deploy to production.
+
+### Customization Guide
+
+To adapt this integration for your own use case:
+
+1. **Modify the Data Model**: Update `backend/scripts/setup_db.py` to create your tables
+2. **Add New Endpoints**: Extend `backend/app/main.py` with your business logic
+3. **Update Frontend**: Modify `frontend/app/src/App.tsx` to match your UI requirements
+4. **Environment Variables**: Add your configuration to `.env` and docker-compose.yml
+
+### Development Workflow
+
+```bash
+# 1. Initialize the project
+make init
+
+# 2. Start all services
+make up
+
+# 3. Set up the database
+make setup-db
+
+# 4. Open in VS Code and start developing
+# The counter will persist across browser refreshes and container restarts
+```
+
 
 ## Advanced Usage
 

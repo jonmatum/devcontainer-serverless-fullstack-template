@@ -527,6 +527,61 @@ validate-config: ## [utilities] Validate all configuration files
 	@printf "$(SUCCESS)[SUCCESS]$(RESET)  Configuration validation completed\n"
 	@echo ""
 
+setup-db: ## [utilities] Initialize DynamoDB tables for the application
+	@printf "$(HEADER)>> Setting Up Database Tables$(RESET)\n"
+	@echo ""
+	@if ! docker compose ps dynamodb-local | grep -q "Up"; then \
+		printf "$(ERROR)[ERROR]$(RESET)    DynamoDB Local container is not running. Run 'make up' first.\n"; \
+		exit 1; \
+	fi
+	@if ! docker compose ps backend | grep -q "Up"; then \
+		printf "$(ERROR)[ERROR]$(RESET)    Backend container is not running. Run 'make up' first.\n"; \
+		exit 1; \
+	fi
+	@printf "$(INFO)[INFO]$(RESET)     Creating DynamoDB tables...\n"
+	@docker compose exec backend python scripts/setup_db.py
+	@printf "$(SUCCESS)[SUCCESS]$(RESET)  Database tables created successfully\n"
+	@echo ""
+
+reset-db: ## [utilities] Reset all database tables (WARNING: This will delete all data)
+	@printf "$(HEADER)>> Resetting Database Tables$(RESET)\n"
+	@echo ""
+	@printf "$(WARNING)[WARNING]$(RESET)  This will delete all data in the database!\n"
+	@read -p "Are you sure? (y/N): " confirm; \
+	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
+		if docker compose ps dynamodb-local | grep -q "Up"; then \
+			printf "$(INFO)[INFO]$(RESET)     Stopping DynamoDB Local...\n"; \
+			docker compose stop dynamodb-local; \
+		fi; \
+		printf "$(INFO)[INFO]$(RESET)     Removing database data...\n"; \
+		rm -rf ./data/*; \
+		printf "$(INFO)[INFO]$(RESET)     Restarting DynamoDB Local...\n"; \
+		docker compose up -d dynamodb-local; \
+		sleep 3; \
+		printf "$(INFO)[INFO]$(RESET)     Recreating tables...\n"; \
+		$(MAKE) setup-db; \
+		printf "$(SUCCESS)[SUCCESS]$(RESET)  Database reset completed\n"; \
+	else \
+		printf "$(INFO)[INFO]$(RESET)     Database reset cancelled\n"; \
+	fi
+	@echo ""
+
+check-db: ## [utilities] Check database connection and table status
+	@printf "$(HEADER)>> Checking Database Status$(RESET)\n"
+	@echo ""
+	@if ! docker compose ps dynamodb-local | grep -q "Up"; then \
+		printf "$(ERROR)[ERROR]$(RESET)    DynamoDB Local container is not running\n"; \
+		exit 1; \
+	fi
+	@if ! docker compose ps backend | grep -q "Up"; then \
+		printf "$(ERROR)[ERROR]$(RESET)    Backend container is not running\n"; \
+		exit 1; \
+	fi
+	@printf "$(INFO)[INFO]$(RESET)     Checking DynamoDB connection...\n"
+	@docker compose exec backend python -c "import boto3; import os; client = boto3.client('dynamodb', endpoint_url=os.getenv('DYNAMODB_ENDPOINT', 'http://dynamodb-local:8000'), region_name='us-east-1', aws_access_key_id='dummy', aws_secret_access_key='dummy'); print('Tables:', client.list_tables()['TableNames'])"
+	@printf "$(SUCCESS)[SUCCESS]$(RESET)  Database connection verified\n"
+	@echo ""
+
 # ==============================================================================
 # HELPER FUNCTIONS
 # ==============================================================================
