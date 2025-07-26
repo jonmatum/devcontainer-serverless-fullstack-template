@@ -75,7 +75,7 @@
             ]
         }
     },
-    "forwardPorts": [3008,3009,3010,3011],
+    "forwardPorts": [3000,3001,3002,3003],
     "onCreateCommand": "sleep 5",
     "postCreateCommand": "sudo chown root:docker /var/run/docker.sock && ./.devcontainer/scripts/verify-install.sh ./.devcontainer/devcontainer.json"
 }
