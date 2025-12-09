@@ -11,7 +11,7 @@ RUN npm install -g pnpm@9.15.4
 COPY ./app/package.json ./app/pnpm-lock.yaml ./
 
 # Install dependencies separately
-RUN if [ -f package.json ]; then pnpm install --frozen-lockfile; fi
+RUN if [ -f package.json ]; then pnpm install --no-frozen-lockfile; fi
 
 # Now copy the entire app source code
 COPY ./app ./app
@@ -24,8 +24,9 @@ COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Security: Create non-root user
-RUN useradd -m -u 1000 nodeuser && chown -R nodeuser:nodeuser /app
-USER nodeuser
+RUN if ! id -u 1000 > /dev/null 2>&1; then useradd -m -u 1000 nodeuser; fi && \
+    chown -R $(id -un 1000):$(id -gn 1000) /app
+USER 1000
 
 # Expose port for Vite dev server
 EXPOSE 3000

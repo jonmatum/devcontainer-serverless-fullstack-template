@@ -18,6 +18,7 @@ install)
 start)
     echo "Starting backend server with Uvicorn..."
     ensure_pipenv
+    pipenv install --dev
     exec pipenv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ;;
 *)
