@@ -7,6 +7,7 @@ services:
       - dev-network
     volumes:
       - .:/workspace:cached
+      # Required for DevContainer functionality in local development
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       disable: true
@@ -21,8 +22,11 @@ services:
       DYNAMODB_ENDPOINT: http://dynamodb-local:${DYNAMODB_PORT}
       AWS_REGION: us-east-1
       TABLE_NAME: counter_table
-      AWS_ACCESS_KEY_ID: dummy
-      AWS_SECRET_ACCESS_KEY: dummy
+      # Security: For development only - use IAM roles in production
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-dummy}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-dummy}
+      # Security: Configure allowed origins for CORS
+      ALLOWED_ORIGINS: http://localhost:${FRONTEND_PORT},http://localhost:${BACKEND_PORT}
     ports:
       - "${BACKEND_PORT}:8000"
     volumes:
@@ -50,7 +54,7 @@ services:
     restart: unless-stopped
 
   dynamodb-local:
-    image: amazon/dynamodb-local
+    image: amazon/dynamodb-local:2.5.3
     command:
       - "-jar"
       - "DynamoDBLocal.jar"
@@ -70,7 +74,7 @@ services:
     restart: unless-stopped
 
   dynamodb-admin:
-    image: aaronshaf/dynamodb-admin
+    image: aaronshaf/dynamodb-admin:4.6.1
     environment:
       - DYNAMO_ENDPOINT=http://dynamodb-local:${DYNAMODB_PORT}
     ports:
@@ -84,3 +88,4 @@ services:
 networks:
   dev-network:
     driver: bridge
+

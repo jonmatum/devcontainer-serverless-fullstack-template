@@ -3,6 +3,7 @@ import os
 import boto3
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
 from botocore.exceptions import ClientError
 import logging
@@ -13,14 +14,40 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="DevContainer Template API", version="1.0.0")
 
-# CORS middleware for frontend communication
+# Security: Configure CORS properly for production
+# For development, allow localhost origins. For production, specify exact domains.
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000,http://localhost:3001,http://localhost:3002"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=ALLOWED_ORIGINS,  # Restricted origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE"],  # Explicit methods only
+    allow_headers=["Content-Type", "Authorization"],  # Explicit headers only
+    max_age=600,  # Cache preflight requests for 10 minutes
 )
+
+# Security: Add trusted host middleware
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["*"]  # Configure for production: ["yourdomain.com", "*.yourdomain.com"]
+)
+
+
+# Security headers middleware
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    return response
+
 
 # DynamoDB configuration - template users can easily modify these
 DYNAMODB_ENDPOINT = os.getenv("DYNAMODB_ENDPOINT", "http://dynamodb-local:8000")
@@ -28,11 +55,11 @@ AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 TABLE_NAME = os.getenv("TABLE_NAME", "counter_table")
 
 # Initialize DynamoDB client
+# Security: In production, use IAM roles instead of access keys
 dynamodb = boto3.resource(
     "dynamodb",
     endpoint_url=DYNAMODB_ENDPOINT,
     region_name=AWS_REGION,
-    # Development credentials - use IAM roles in production
     aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "dummy"),
     aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "dummy"),
 )
@@ -84,10 +111,10 @@ async def get_counter():
         )
         
     except ClientError as e:
-        logger.error(f"DynamoDB error: {e}")
+        logger.error("DynamoDB error occurred")  # Don't log sensitive details
         raise HTTPException(status_code=500, detail="Database connection error")
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.error("Unexpected error occurred")  # Don't log exception details
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -114,7 +141,7 @@ async def increment_counter(update: CounterUpdate = CounterUpdate()):
         
         new_count = response["Attributes"]["count"]
         
-        logger.info(f"Counter incremented to {new_count}")
+        logger.info("Counter operation completed successfully")  # Sanitized logging
         
         return CounterResponse(
             count=new_count,
@@ -123,10 +150,10 @@ async def increment_counter(update: CounterUpdate = CounterUpdate()):
         )
         
     except ClientError as e:
-        logger.error(f"DynamoDB error: {e}")
+        logger.error("DynamoDB error occurred")
         raise HTTPException(status_code=500, detail="Database connection error")
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.error("Unexpected error occurred")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -147,7 +174,7 @@ async def reset_counter():
             }
         )
         
-        logger.info("Counter reset to 0")
+        logger.info("Counter reset operation completed")
         
         return CounterResponse(
             count=0,
@@ -156,8 +183,8 @@ async def reset_counter():
         )
         
     except ClientError as e:
-        logger.error(f"DynamoDB error: {e}")
+        logger.error("DynamoDB error occurred")
         raise HTTPException(status_code=500, detail="Database connection error")
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.error("Unexpected error occurred")
         raise HTTPException(status_code=500, detail="Internal server error")
